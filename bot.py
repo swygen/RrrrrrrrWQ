@@ -10,139 +10,39 @@ user_captcha_answers = {} user_language = {}
 
 Define multilingual content with flags
 
-menu_content = {
-    "English": {
-        "flag": "🇺🇸",
-        "buttons": {
-            "contact": "📞 Contact Admin",
-            "rules": "📋 View Rules",
-            "language": "🌐 Change Language",
-            "back": "🔙 Back",
-            "add_to_group": "➕ Add to Group",
-            "send_message": "✉️ Send Message"
-        },
-        "rules_text": """📋 <b>Group Help Bot</b> was developed in PHP and has been online since April 13, 2016, with ongoing updates!
+menu_content = { "English": { "flag": "\U0001F1EC\U0001F1E7",  # UK flag "buttons": { "contact": "📞 Contact Admin", "rules": "📋 View Rules", "language": "🌐 Change Language", "back": "🔙 Back", "add_to_group": "➕ Add to Group", "send_message": "✉️ Send Message" }, "rules_text": """📋 Group Help Bot was developed in PHP and has been online since April 13, 2016, with ongoing updates!
 
-<b>Bot Version:</b> 10.9
+Bot Version: 10.9
 
-<b>Bot Admins:</b> 
-• Developer: Swygen Official  
-• The Doctor: Server Manager  
-• Manuel: Developer  
+Bot Admins: • Developer: Swygen Official
+• The Doctor: Server Manager
+• Manuel: Developer
 • M4R10: Support Director
 
 ⚠️ Bot staff cannot assist with group issues using this bot.
 
-<b>Thanks</b> to all donors who support server and development costs, and to those who reported bugs or suggested features.
+Thanks to all donors who support server and development costs, and to those who reported bugs or suggested features.
 
-<b>We appreciate all groups who rely on our bot!</b>""",
-        "group_welcome": """✅ <b>Welcome {name}</b>, feel free to contact - @Swygen_bd"""
-    },
-    "Bangla": {
-        "flag": "🇧🇩",
-        "buttons": {
-            "contact": "📞 অ্যাডমিনের সাথে যোগাযোগ",
-            "rules": "📋 রুলস দেখুন",
-            "language": "🌐 ভাষা পরিবর্তন করুন",
-            "back": "🔙 ফিরে যান",
-            "add_to_group": "➕ গ্রুপে যুক্ত করুন",
-            "send_message": "✉️ মেসেজ পাঠান"
-        },
-        "rules_text": """📋 <b>Group Help Bot</b> PHP-এ তৈরি এবং ১৩ এপ্রিল ২০১৬ থেকে চালু আছে নিয়মিত আপডেটসহ।
+We appreciate all groups who rely on our bot!""", "group_welcome": """✅ <b>Welcome {name}</b>, feel free to contact - @mahtabnihar
 
-<b>বট সংস্করণ:</b> 10.9
+<b>Username:</b> {username}
+<b>Joining:</b> {join_time}""" }, "Bangla": { "flag": "\U0001F1E7\U0001F1E9", "buttons": { "contact": "📞 অ্যাডমিনের সাথে যোগাযোগ", "rules": "📋 রুলস দেখুন", "language": "🌐 ভাষা পরিবর্তন", "back": "🔙 ফিরে যান", "add_to_group": "➕ গ্রুপে যুক্ত করুন", "send_message": "✉️ মেসেজ পাঠান" }, "rules_text": """📋 Group Help Bot was developed in PHP and has been online since April 13, 2016, with ongoing updates!
 
-<b>বট অ্যাডমিন:</b>  
-• ডেভেলপার: Swygen Official  
-• The Doctor: সার্ভার ম্যানেজার  
-• Manuel: ডেভেলপার  
-• M4R10: সহায়তা পরিচালক
+Bot Version: 10.9
 
-⚠️ বট কর্মীরা এই বটের মাধ্যমে গ্রুপ সমস্যায় সহায়তা করতে পারবে না।
+Bot Admins: • Developer: Swygen Official
+• The Doctor: Server Manager
+• Manuel: Developer
+• M4R10: Support Director
 
-<b>ধন্যবাদ</b> সবাইকে যারা সার্ভার ও ডেভেলপমেন্টে সাহায্য করেছেন এবং বাগ রিপোর্ট করেছেন বা পরামর্শ দিয়েছেন।
+⚠️ Bot staff cannot assist with group issues using this bot.
 
-<b>যেসব গ্রুপ আমাদের বট ব্যবহার করে, তাদের কৃতজ্ঞতা!</b>""",
-        "group_welcome": """✅ <b>Welcome {name}</b>, প্রয়োজনে যোগাযোগ করুন - @Swygen_bd"""
-    },
-    "Hindi": {
-        "flag": "🇮🇳",
-        "buttons": {
-            "contact": "📞 एडमिन से संपर्क करें",
-            "rules": "📋 नियम देखें",
-            "language": "🌐 भाषा बदलें",
-            "back": "🔙 वापस जाएं",
-            "add_to_group": "➕ ग्रुप में जोड़ें",
-            "send_message": "✉️ संदेश भेजें"
-        },
-        "rules_text": """📋 <b>Group Help Bot</b> PHP में विकसित किया गया और 13 अप्रैल 2016 से लगातार ऑनलाइन है।
+Thanks to all donors who support server and development costs, and to those who reported bugs or suggested features.
 
-<b>बॉट संस्करण:</b> 10.9
+We appreciate all groups who rely on our bot!""", "group_welcome": """✅ <b>Welcome {name}</b>, যেকোনো প্রয়োজনে যোগাযোগ করুন - @mahtabnihar
 
-<b>बॉट एडमिन:</b>  
-• डेवलपर: Swygen Official  
-• The Doctor: सर्वर मैनेजर  
-• Manuel: डेवलपर  
-• M4R10: समर्थन निदेशक
-
-⚠️ बॉट टीम इस बॉट से ग्रुप समस्याओं में मदद नहीं कर सकती।
-
-<b>धन्यवाद</b> सभी दाताओं और सुझाव देने वालों को!
-
-<b>हम उन सभी ग्रुप्स की सराहना करते हैं जो हमारे बॉट पर निर्भर हैं!</b>""",
-        "group_welcome": """✅ <b>Welcome {name}</b>, ज़रूरत पर संपर्क करें - @Swygen_bd"""
-    },
-    "China": {
-        "flag": "🇨🇳",
-        "buttons": {
-            "contact": "📞 联系管理员",
-            "rules": "📋 查看规则",
-            "language": "🌐 更改语言",
-            "back": "🔙 返回",
-            "add_to_group": "➕ 添加到群组",
-            "send_message": "✉️ 发送消息"
-        },
-        "rules_text": """📋 <b>Group Help Bot</b> 是用 PHP 开发的，自 2016 年 4 月 13 日以来一直在线，持续更新中。
-
-<b>机器人版本:</b> 10.9
-
-<b>机器人管理员:</b>  
-• 开发者: Swygen Official  
-• The Doctor: 服务器管理员  
-• Manuel: 开发人员  
-• M4R10: 支持主管
-
-⚠️ 本机器人团队无法通过机器人处理群组问题。
-
-<b>感谢所有支持开发和服务器的人们！</b>""",
-        "group_welcome": """✅ <b>Welcome {name}</b>，如有需要请联系 - @Swygen_bd"""
-    },
-    "Arabic": {
-        "flag": "🇸🇦",
-        "buttons": {
-            "contact": "📞 اتصل بالمسؤول",
-            "rules": "📋 عرض القواعد",
-            "language": "🌐 تغيير اللغة",
-            "back": "🔙 رجوع",
-            "add_to_group": "➕ أضف إلى المجموعة",
-            "send_message": "✉️ أرسل رسالة"
-        },
-        "rules_text": """📋 <b>بوت Group Help</b> تم تطويره بـ PHP وهو نشط منذ 13 أبريل 2016 مع تحديثات مستمرة.
-
-<b>إصدار البوت:</b> 10.9
-
-<b>المسؤولون:</b>  
-• المطور: Swygen Official  
-• The Doctor: مدير الخادم  
-• Manuel: مطور  
-• M4R10: مدير الدعم
-
-⚠️ لا يمكن لفريق البوت المساعدة في مشكلات المجموعة من خلال هذا البوت.
-
-<b>شكرًا لجميع المتبرعين والمستخدمين!</b>""",
-        "group_welcome": """✅ <b>Welcome {name}</b>، تواصل معنا إذا لزم الأمر - @Swygen_bd"""
-    }
-}
+<b>Username:</b> {username}
+<b>Joining:</b> {join_time}""" } # You can add Hindi, Chinese, Arabic versions in the same format }
 
 Flask keep-alive setup
 
@@ -173,26 +73,8 @@ if query.data == "rules":
 elif query.data == "language":
     langs = list(menu_content.keys())
     lang_buttons = [[InlineKeyboardButton(f"{menu_content[l]['flag']} {l}", callback_data=f"lang_{l}")] for l in langs]
-    # একটি ডিফল্ট ভাষা ব্যবহার করব যেটা ব্যাক বাটনের জন্য ব্যবহার হবে
-default_lang = "English"
-
-# ভাষা ও পতাকা সহ বাটন তৈরি
-lang_buttons = [
-    [InlineKeyboardButton(f"{menu_content[lang]['flag']} {lang}", callback_data=f"lang_{lang}")]
-    for lang in menu_content
-]
-
-# পেছনে যাওয়ার বাটন যুক্ত করা
-lang_buttons.append([
-    InlineKeyboardButton(menu_content[default_lang]['buttons']['back'], callback_data="back")
-])
-
-# ইউজারকে ভাষা বেছে নেওয়ার জন্য মেসেজ পাঠানো
-await query.message.edit_text(
-    text="🌐 <b>Select your language:</b>",
-    parse_mode="HTML",
-    reply_markup=InlineKeyboardMarkup(lang_buttons)
-)
+    lang_buttons.append([InlineKeyboardButton(menu_content[lang]['buttons']['back'], callback_data="back")])
+    await query.message.edit_text("🌐 <b>Select your language:</b>", parse_mode="HTML", reply_markup=InlineKeyboardMarkup(lang_buttons))
 elif query.data.startswith("lang_"):
     selected_lang = query.data.split("_")[1]
     user_language[user.id] = selected_lang
