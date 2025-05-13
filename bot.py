@@ -1,214 +1,232 @@
-import os
-import random
-import datetime
-from dotenv import load_dotenv
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (
-    ApplicationBuilder, CommandHandler, CallbackQueryHandler,
-    MessageHandler, ContextTypes, filters
-)
-from flask import Flask
-import threading
+import os import random import datetime import threading from dotenv import load_dotenv from telegram import ( Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatMember ) from telegram.ext import ( ApplicationBuilder, CommandHandler, CallbackQueryHandler, MessageHandler, ContextTypes, filters, ChatMemberHandler ) from flask import Flask
 
-load_dotenv()
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+load_dotenv() BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-user_captcha_answers = {}
-user_language = {}
+user_captcha_answers = {} user_language = {}
 
-app = Flask(__name__)
+menu_content = {
+    "English": {
+        "buttons": {
+            "contact": "📞 Contact Admin",
+            "rules": "📋 View Rules",
+            "language": "🌐 Language",
+            "back": "🔙 Back",
+            "add_to_group": "➕ Add to Group",
+            "send_message": "✉️ Send Message"
+        },
+        "rules_text": """📋 <b>Group Help Bot</b> was developed in PHP and has been online since April 13, 2016, with ongoing updates!
 
-@app.route('/')
-def home():
-    return "Bot is running!"
+<b>Bot Version:</b> 10.9
 
-def keep_alive():
-    app.run(host='0.0.0.0', port=8080)
+<b>Bot Admins:</b> 
+• Developer: Swygen Official  
+• The Doctor: Server Manager  
+• Manuel: Developer  
+• M4R10: Support Director
 
-def generate_captcha():
-    num1 = random.randint(10, 99)
-    num2 = random.randint(10, 99)
-    op = random.choice(['+', '-'])
-    question = f"{num1} {op} {num2}"
-    answer = eval(question)
-    return question, answer
+⚠️ Bot staff cannot assist with group issues using this bot.
 
-def get_welcome_text(user, lang, bot_name):
-    now = datetime.datetime.now(datetime.timezone.utc).astimezone(datetime.timezone(datetime.timedelta(hours=6)))
-    weekday = now.strftime('%A')
-    date = now.strftime('%Y-%m-%d')
-    time = now.strftime('%I:%M:%S %p')
+<b>Thanks</b> to all donors who support server and development costs, and to those who reported bugs or suggested features.
 
-    templates = {
-        "English": f"""✅ <b>Welcome <a href='tg://user?id={user.id}'>{user.first_name}</a></b>
+<b>We appreciate all groups who rely on our bot!</b>""",
+        "group_welcome": """✅ <b>Welcome Game</b>, feel free to contact - @mahtabnihar
 
-<b>Name:</b> {user.first_name} {user.last_name or ''} <b>ID:</b> <code>{user.id}</code> <b>Username:</b> @{user.username or 'None'} <b>Date & Time:</b> {weekday}, {date} – {time} <b>Bot Name:</b> {bot_name}
+<b>Our Services:</b> 
+• Tournament App (Popular🔥)  
+• Android App  
+• Website  
+• Digital Marketing etc.
 
-<b>Our Services:</b>
-All Type App Development
-Website Development
-Bot Development
-Support IT
-Automation & Promote
+<b>Username:</b> {username}  
+<b>Joining:</b> {join_time}"""
+    },
 
-🌐 Website: https://swygen.netlify.app/
-📋 Click the button below to read our rules.""",
+    "Bangla": {
+        "buttons": {
+            "contact": "📞 অ্যাডমিনের সাথে যোগাযোগ করুন",
+            "rules": "📋 রুলস পড়ুন",
+            "language": "🌐 ভাষা পরিবর্তন করুন",
+            "back": "🔙 ফিরে যান",
+            "add_to_group": "➕ গ্রুপে যুক্ত করুন",
+            "send_message": "✉️ মেসেজ পাঠান"
+        },
+        "rules_text": """📋 <b>গ্রুপ হেল্প</b> হল একটি বট যা PHP-এ বিকশিত হয়েছে, এটি 13 এপ্রিল 2016 থেকে অনলাইনে রয়েছে এবং এটি ক্রমাগত আপডেট করা হয়!
 
-        "Bangla": f"""✅ <b>স্বাগতম <a href='tg://user?id={user.id}'>{user.first_name}</a></b>
+<b>বট সংস্করণ:</b> 10.9
 
-<b>আপনার নাম:</b> {user.first_name} {user.last_name or ''}
-<b>আইডি:</b> <code>{user.id}</code>
-<b>ইউজারনেম:</b> @{user.username or 'None'}
-<b>তারিখ ও সময়:</b> {weekday}, {date} – {time}
-<b>বট নাম:</b> {bot_name}
+<b>বট অ্যাডমিন:</b>  
+• ডেভেলপার: Swygen Official  
+• The Doctor: সার্ভার ম্যানেজার  
+• Manuel: ডেভেলপার  
+• M4R10: সমর্থন পরিচালক
 
-<b>আমাদের সেবা সমূহ:</b>
-• অ্যাপ ডেভেলপমেন্ট
-• ওয়েবসাইট ডেভেলপমেন্ট
-• বট তৈরি
-• আইটি সাপোর্ট
-• অটোমেশন ও প্রমোশন
+⚠️ বট কর্মীরা এই বট ব্যবহার করে গোষ্ঠীর সাথে জড়িত সমস্যায় সহায়তা করতে পারবে না।
 
-🌐 ওয়েবসাইট: https://swygen.netlify.app/
-📋 নিচের বাটনে ক্লিক করে আমাদের নিয়মাবলী পড়ুন।""",
+<b>ধন্যবাদ</b> আমাদের সকল দাতাকে যারা সার্ভার ও ডেভেলপমেন্ট খরচে সহায়তা করেছেন এবং যারা বাগ রিপোর্ট করেছেন বা নতুন ফিচারের প্রস্তাব দিয়েছেন।
 
-        "China": f"""✅ <b>欢迎 <a href='tg://user?id={user.id}'>{user.first_name}</a></b>
+<b>যেসব গ্রুপ এই বটের উপর নির্ভর করে তাদের সবাইকে ধন্যবাদ!</b>""",
+        "group_welcome": """✅ <b>Welcome Game</b>, যেকোনো প্রয়োজনে যোগাযোগ করুন - @mahtabnihar
 
-<b>名称:</b> {user.first_name} {user.last_name or ''}
-<b>ID:</b> <code>{user.id}</code>
-<b>用户名:</b> @{user.username or 'None'}
-<b>日期和时间:</b> {weekday}, {date} – {time}
-<b>机器人名称:</b> {bot_name}
+<b>আমাদের সেবা সমূহ:</b> 
+• Tournament App (Popular🔥)  
+• Android App  
+• Website  
+• Digital Marketing ইত্যাদি
 
-<b>我们的服务:</b>
-• 应用开发
-• 网站开发
-• 机器人开发
-• 技术支持
-• 自动化与推广
+<b>Username:</b> {username}  
+<b>Joining:</b> {join_time}"""
+    },
 
-🌐 网站: https://swygen.netlify.app/
-📋 点击按钮查看规则。""",
+    "China": {
+        "buttons": {
+            "contact": "📞 联系管理员",
+            "rules": "📋 查看规则",
+            "language": "🌐 更改语言",
+            "back": "🔙 返回",
+            "add_to_group": "➕ 添加到群组",
+            "send_message": "✉️ 发送消息"
+        },
+        "rules_text": """📋 <b>Group Help Bot</b> 是一个使用 PHP 开发的机器人，自 2016 年 4 月 13 日上线以来持续更新！
 
-        "Hindi": f"""✅ <b>स्वागत है <a href='tg://user?id={user.id}'>{user.first_name}</a></b>
+<b>机器人版本:</b> 10.9
 
-<b>नाम:</b> {user.first_name} {user.last_name or ''}
-<b>ID:</b> <code>{user.id}</code>
-<b>यूज़रनेम:</b> @{user.username or 'None'}
-<b>तारीख और समय:</b> {weekday}, {date} – {time}
-<b>बॉट का नाम:</b> {bot_name}
+<b>管理员:</b>  
+• 开发者: Swygen Official  
+• The Doctor: 服务器管理员  
+• Manuel: 开发人员  
+• M4R10: 支持主管
 
-<b>हमारी सेवाएं:</b>
-• ऐप डेवलपमेंट
-• वेबसाइट डेवलपमेंट
-• बॉट डेवलपमेंट
-• आईटी सपोर्ट
-• ऑटोमेशन और प्रमोशन
+⚠️ 工作人员无法通过此机器人处理群组问题。
 
-🌐 वेबसाइट: https://swygen.netlify.app/
-📋 नियम देखने के लिए नीचे बटन पर क्लिक करें।""",
+<b>感谢所有支持者和建议者！</b>""",
+        "group_welcome": """✅ <b>欢迎 Game</b>，如有需要请联系 - @mahtabnihar
 
-        "Arabic": f"""✅ <b>مرحبًا <a href='tg://user?id={user.id}'>{user.first_name}</a></b>
+<b>我们的服务:</b>  
+• 比赛应用程序（热门）  
+• 安卓应用  
+• 网站  
+• 数字营销 等等
 
-<b>الاسم:</b> {user.first_name} {user.last_name or ''}
-<b>المعرف:</b> <code>{user.id}</code>
-<b>اسم المستخدم:</b> @{user.username or 'None'}
-<b>التاريخ والوقت:</b> {weekday}, {date} – {time}
-<b>اسم البوت:</b> {bot_name}
+<b>用户名:</b> {username}  
+<b>加入时间:</b> {join_time}"""
+    },
 
-<b>خدماتنا:</b>
-• تطوير التطبيقات
-• تطوير المواقع
-• تطوير البوت
-• الدعم الفني
-• الأتمتة والترويج
+    "Hindi": {
+        "buttons": {
+            "contact": "📞 एडमिन से संपर्क करें",
+            "rules": "📋 नियम देखें",
+            "language": "🌐 भाषा बदलें",
+            "back": "🔙 वापस जाएं",
+            "add_to_group": "➕ ग्रुप में जोड़ें",
+            "send_message": "✉️ संदेश भेजें"
+        },
+        "rules_text": """📋 <b>Group Help Bot</b> एक PHP में विकसित किया गया बॉट है, जो 13 अप्रैल 2016 से ऑनलाइन है और लगातार अपडेट होता रहता है!
 
-🌐 الموقع الإلكتروني: https://swygen.netlify.app/
-📋 اضغط الزر أدناه لقراءة القواعد."""
+<b>बॉट संस्करण:</b> 10.9
+
+<b>बॉट एडमिन:</b>  
+• डेवलपर: Swygen Official  
+• The Doctor: सर्वर मैनेजर  
+• Manuel: डेवलपर  
+• M4R10: समर्थन निदेशक
+
+⚠️ बॉट स्टाफ इस बॉट से ग्रुप समस्याओं में सहायता नहीं कर सकता।
+
+<b>धन्यवाद</b> सभी दाताओं को और जिन्होंने बग रिपोर्ट या सुझाव दिए।""",
+        "group_welcome": """✅ <b>Welcome Game</b>, किसी भी ज़रूरत के लिए संपर्क करें - @mahtabnihar
+
+<b>हमारी सेवाएं:</b>  
+• टूर्नामेंट ऐप (लोकप्रिय)  
+• एंड्रॉइड ऐप  
+• वेबसाइट  
+• डिजिटल मार्केटिंग आदि
+
+<b>यूज़रनेम:</b> {username}  
+<b>जॉइनिंग:</b> {join_time}"""
+    },
+
+    "Arabic": {
+        "buttons": {
+            "contact": "📞 اتصل بالمسؤول",
+            "rules": "📋 عرض القواعد",
+            "language": "🌐 تغيير اللغة",
+            "back": "🔙 رجوع",
+            "add_to_group": "➕ أضف إلى المجموعة",
+            "send_message": "✉️ أرسل رسالة"
+        },
+        "rules_text": """📋 <b>بوت Group Help</b> تم تطويره بـ PHP وهو متصل منذ 13 أبريل 2016 ويستمر تحديثه باستمرار!
+
+<b>إصدار البوت:</b> 10.9
+
+<b>إدارة البوت:</b>  
+• المطور: Swygen Official  
+• The Doctor: مدير الخادم  
+• Manuel: مطور  
+• M4R10: مدير الدعم
+
+⚠️ لا يستطيع فريق البوت المساعدة في مشاكل المجموعة من خلال هذا البوت.
+
+<b>شكرًا لجميع المتبرعين والمستخدمين!</b>""",
+        "group_welcome": """✅ <b>مرحبًا Game</b>، تواصل معنا عند الحاجة - @mahtabnihar
+
+<b>خدماتنا:</b>  
+• تطبيق البطولة  
+• تطبيق أندرويد  
+• موقع إلكتروني  
+• التسويق الرقمي وغير ذلك
+
+<b>اسم المستخدم:</b> {username}  
+<b>الانضمام:</b> {join_time}"""
     }
+}
 
-    return templates.get(lang, templates["English"])
+app = Flask(name)
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    question, answer = generate_captcha()
-    user_captcha_answers[user.id] = answer
-    user_language[user.id] = "Bangla"
+@app.route('/') def home(): return "Swygen Help Bot is running!"
 
-    await update.message.reply_text(
-        f"🔐 <b>ভেরিফিকেশনের জন্য নিচের প্রশ্নটির উত্তর দিন:</b>\n\n{question} = ?",
-        parse_mode="HTML"
+def keep_alive(): app.run(host='0.0.0.0', port=8080)
+
+def generate_captcha(): num1 = random.randint(10, 99) num2 = random.randint(10, 99) op = random.choice(['+', '-']) question = f"{num1} {op} {num2}" answer = eval(question) return question, answer
+
+def get_buttons(lang): buttons = menu_content[lang]["buttons"] return [ [InlineKeyboardButton(buttons["contact"], url="https://t.me/Swygen_bd")], [InlineKeyboardButton(buttons["rules"], callback_data="rules")], [InlineKeyboardButton(buttons["language"], callback_data="language")], [InlineKeyboardButton(buttons["add_to_group"], url=f"https://t.me/SwygenHelpBot?startgroup=true")] ]
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE): user = update.effective_user question, answer = generate_captcha() user_captcha_answers[user.id] = answer user_language[user.id] = "Bangla" await update.message.reply_text( f"🔐 <b>ভেরিফিকেশনের জন্য প্রশ্নটিটি উত্তর দিন:</b>\n\n{question} = ?", parse_mode="HTML" )
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE): user = update.effective_user if user.id in user_captcha_answers: try: if int(update.message.text.strip()) == user_captcha_answers[user.id]: del user_captcha_answers[user.id] await send_welcome(update, context, new=True) else: await update.message.reply_text("❌ ভুল উত্তর! আবার চেষ্টা করুন।") except ValueError: await update.message.reply_text("⚠️ শুধু সংখ্যা দিন।") else: await update.message.reply_text("➤ অনুগ্রহ করে /start দিয়ে শুরু করুন।")
+
+async def send_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE, new=False): user = update.effective_user lang = user_language.get(user.id, "Bangla") now = datetime.datetime.now(datetime.timezone.utc).astimezone(datetime.timezone(datetime.timedelta(hours=6))) weekday = now.strftime('%A') date = now.strftime('%Y-%m-%d') time = now.strftime('%I:%M:%S %p')
+
+text = f"""✅ <b>Welcome <a href='tg://user?id={user.id}'>{user.first_name}</a></b>
+
+<b>Name:</b> {user.first_name} {user.last_name or ''} <b>ID:</b> <code>{user.id}</code> <b>Username:</b> @{user.username or 'None'} <b>Date & Time:</b> {weekday}, {date} – {time} <b>Bot Name:</b> Swygen Help Bot
+
+{menu_content[lang]['rules_text']}""" markup = InlineKeyboardMarkup(get_buttons(lang))
+
+if new:
+    await update.message.reply_html(text, reply_markup=markup)
+else:
+    await update.callback_query.message.edit_text(text, parse_mode="HTML", reply_markup=markup)
+
+async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE): query = update.callback_query await query.answer() user = query.from_user lang = user_language.get(user.id, "Bangla")
+
+if query.data == "rules":
+    await query.message.edit_text(
+        menu_content[lang]['rules_text'], parse_mode="HTML",
+        reply_markup=InlineKeyboardMarkup(InlineKeyboardButton(menu_content[lang]['buttons']['back'], callback_data="back"))
     )
+elif query.data == "language":
+    langs = list(menu_content.keys())
+    lang_buttons = [[InlineKeyboardButton(l, callback_data=f"lang_{l}")] for l in langs]
+    lang_buttons.append([InlineKeyboardButton(menu_content[lang]['buttons']['back'], callback_data="back")])
+    await query.message.edit_text("🌐 <b>Select your language:</b>", parse_mode="HTML", reply_markup=InlineKeyboardMarkup(lang_buttons))
+elif query.data.startswith("lang_"):
+    selected_lang = query.data.split("_")[1]
+    user_language[user.id] = selected_lang
+    await send_welcome(update, context, new=False)
+elif query.data == "back":
+    await send_welcome(update, context, new=False)
 
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    if user.id in user_captcha_answers:
-        try:
-            if int(update.message.text.strip()) == user_captcha_answers[user.id]:
-                del user_captcha_answers[user.id]
-                await send_welcome(update, context, new=True)
-            else:
-                await update.message.reply_text("❌ ভুল উত্তর! আবার চেষ্টা করুন।")
-        except ValueError:
-            await update.message.reply_text("⚠️ শুধু সংখ্যা দিন।")
-    else:
-        await update.message.reply_text("➤ অনুগ্রহ করে /start দিয়ে শুরু করুন।")
+async def welcome_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE): member = update.chat_member if member.new_chat_member.status == ChatMember.MEMBER: user = member.new_chat_member.user lang = user_language.get(user.id, "Bangla") now = datetime.datetime.now(datetime.timezone.utc).astimezone(datetime.timezone(datetime.timedelta(hours=6))) time_str = now.strftime("%d/%m/%Y %H:%M:%S") message = menu_content[lang]['group_welcome'].format(username=f"@{user.username or 'None'}", join_time=time_str) keyboard = InlineKeyboardButton(menu_content[lang]['buttons']['send_message'], url="https://t.me/Swygen_bd") await context.bot.send_message(chat_id=update.chat_member.chat.id, text=message, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(keyboard))
 
-async def send_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE, new=False):
-    user = update.effective_user
-    lang = user_language.get(user.id, "Bangla")
-    text = get_welcome_text(user, lang, context.bot.name)
+if name == "main": threading.Thread(target=keep_alive).start() app = ApplicationBuilder().token(BOT_TOKEN).build() app.add_handler(CommandHandler("start", start)) app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)) app.add_handler(CallbackQueryHandler(button_handler)) app.add_handler(ChatMemberHandler(welcome_new_member, ChatMemberHandler.CHAT_MEMBER)) app.run_polling()
 
-    keyboard = [
-        [InlineKeyboardButton("📞 Contact Admin", url="https://t.me/Swygen_bd")],
-        [InlineKeyboardButton("📋 রুলস পড়ুন", callback_data="rules")],
-        [InlineKeyboardButton("🌐 Language", callback_data="language")]
-    ]
-    markup = InlineKeyboardMarkup(keyboard)
-
-    if new:
-        await update.message.reply_html(text, reply_markup=markup)
-    else:
-        await update.callback_query.message.edit_text(text, parse_mode="HTML", reply_markup=markup)
-
-async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    user = query.from_user
-
-    if query.data == "rules":
-        await query.message.edit_text(
-            "📋 <b>নিয়মাবলী:</b>\n"
-            "1. গালিগালাজ নিষিদ্ধ\n"
-            "2. স্প্যাম নিষিদ্ধ\n"
-            "3. ভুল তথ্য প্রদান থেকে বিরত থাকুন\n"
-            "4. নিয়ম ভাঙলে ব্যান করা হতে পারে\n\n"
-            "✅ নিয়ম মেনে চলুন।",
-            parse_mode="HTML",
-            reply_markup=InlineKeyboardMarkup(InlineKeyboardButton("🔙 Back", callback_data="back"))
-        )
-
-    elif query.data == "language":
-        langs = ["English", "Bangla", "China", "Hindi", "Arabic"]
-        lang_buttons = [[InlineKeyboardButton(lang, callback_data=f"lang_{lang}")] for lang in langs]
-        lang_buttons.append([InlineKeyboardButton("🔙 Back", callback_data="back")])
-        await query.message.edit_text("🌐 <b>Select your language:</b>", parse_mode="HTML", reply_markup=InlineKeyboardMarkup(lang_buttons))
-
-    elif query.data.startswith("lang_"):
-        lang = query.data.split("_")[1]
-        user_language[user.id] = lang
-        await send_welcome(update, context, new=False)
-
-    elif query.data == "back":
-        await send_welcome(update, context, new=False)
-
-# Run the bot
-if __name__ == "__main__":
-    threading.Thread(target=keep_alive).start()
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
-
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    app.add_handler(CallbackQueryHandler(button_handler))
-
-    app.run_polling()
